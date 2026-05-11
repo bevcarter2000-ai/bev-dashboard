@@ -423,6 +423,10 @@ const PAGE = 100;
 let expandedId = null;
 
 function getKey() { return document.getElementById('apiKey').value.trim(); }
+function saveKey() {
+  var k = getKey();
+  if (k) localStorage.setItem('sw_api_key', k);
+}
 
 function showError(msg) {
   const a = document.getElementById('errorAlert');
@@ -460,6 +464,7 @@ async function loadTemplates() {
 
 async function loadAll() {
   if (!getKey()) { showError('Please enter your SmartWaiver API key first.'); return; }
+  saveKey();
   hideError();
   allWaivers = []; offset = 0;
   document.getElementById('statsRow').style.display = 'none';
@@ -617,6 +622,7 @@ function toggleExpand(wId) {
 
 function clearDashboard() {
   allWaivers = []; templates = {}; offset = 0; expandedId = null;
+  localStorage.removeItem('sw_api_key');
   document.getElementById('apiKey').value = '';
   document.getElementById('statsRow').style.display = 'none';
   document.getElementById('topbarStatus').textContent = 'Not connected';
@@ -642,6 +648,12 @@ function exportCSV() {
 }
 
 document.getElementById('apiKey').addEventListener('keydown', e => { if (e.key === 'Enter') loadAll(); });
+// Load saved API key from localStorage
+var savedKey = localStorage.getItem('sw_api_key');
+if (savedKey) {
+  document.getElementById('apiKey').value = savedKey;
+  loadAll();
+}
 </script>
 </body>
 </html>
