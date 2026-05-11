@@ -243,6 +243,26 @@
 </style>
 </head>
 <body>
+<div id="pw-overlay" style="position:fixed;inset:0;background:#1a1917;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Georgia,serif;">
+  <div style="background:#ffffff;border-radius:12px;padding:2.5rem 2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+    <div style="width:48px;height:48px;background:#2d6a2d;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:22px;color:white;">&#9978;</div>
+    <h1 style="font-size:20px;font-weight:bold;color:#1a1917;margin:0 0 0.25rem;">Ranch Property Map</h1>
+    <p style="font-size:13px;color:#6b6860;margin:0 0 1.5rem;font-family:sans-serif;">Last Oaks LLC &mdash; Staff Access Only</p>
+    <input type="password" id="pw-input" placeholder="Enter password&hellip;" onkeydown="if(event.key==='Enter')checkPw()" style="width:100%;padding:10px 14px;border:1px solid #ccc9be;border-radius:6px;font-size:14px;font-family:sans-serif;outline:none;margin-bottom:10px;box-sizing:border-box;" />
+    <div id="pw-error" style="color:#8b2020;font-size:12px;font-family:sans-serif;margin-bottom:8px;display:none;">Incorrect password. Please try again.</div>
+    <button onclick="checkPw()" style="width:100%;padding:10px;background:#2d6a2d;color:white;border:none;border-radius:6px;font-size:14px;font-weight:600;font-family:sans-serif;cursor:pointer;">Unlock</button>
+  </div>
+</div>
+<script>
+var HASH = -747169588;
+function djb(s){var h=0;for(var i=0;i<s.length;i++){h=((31*h)+s.charCodeAt(i))&0xFFFFFFFF;if(h>=0x80000000)h-=0x100000000;}return h;}
+function checkPw(){
+  var s=document.getElementById('pw-input').value;
+  if(djb(s)===HASH){document.getElementById('pw-overlay').style.display='none';sessionStorage.setItem('lo_auth',HASH);}
+  else{document.getElementById('pw-error').style.display='block';document.getElementById('pw-input').value='';}
+}
+if(sessionStorage.getItem('lo_auth')==String(HASH)){document.getElementById('pw-overlay').style.display='none';}
+</script>
 <div id="map"></div>
 <div class="panel">
   <h2>Ranch Properties</h2>
