@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartWaiver Dashboard</title>
+<style>
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: #e2e0d8;
+    --border2: #ccc9be;
+    --text: #1a1917;
+    --text2: #6b6860;
+    --text3: #9b9890;
+    --accent: #1a6b4a;
+    --accent-bg: #eaf5ef;
+    --accent-text: #0f4a32;
+    --warn-bg: #fef9ec;
+    --warn-text: #7a5c0a;
+    --danger-bg: #fdf0f0;
+    --danger-text: #8b2020;
+    --info-bg: #eef4fb;
+    --info-text: #1a4a7a;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Top bar */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Georgia', serif;
+    font-size: 17px;
+    font-weight: bold;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px;
+  }
+  .topbar-right {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  /* Main layout */
+  .main { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+
+  /* API Key card */
+  .api-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .api-card h2 { font-size: 15px; font-weight: bold; margin-bottom: 0.5rem; color: var(--text); font-family: Georgia, serif; }
+  .api-card p { font-size: 13px; color: var(--text2); margin-bottom: 1rem; font-family: sans-serif; }
+  .api-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .api-row input {
+    flex: 1; min-width: 260px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    padding: 9px 14px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .api-row input:focus { border-color: var(--accent); }
+  .btn {
+    padding: 9px 20px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: 13px;
+    font-family: sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #155c3d; }
+  .btn-primary:disabled { background: var(--text3); cursor: not-allowed; }
+  .btn-ghost {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--border); }
+
+  /* Alert */
+  .alert {
+    display: none;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: sans-serif;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+  }
+  .alert-danger { background: var(--danger-bg); color: var(--danger-text); border-color: #f5c6c6; display: flex; align-items: center; gap: 8px; }
+  .alert-success { background: var(--accent-bg); color: var(--accent-text); border-color: #b8dfc9; }
+
+  /* Stats row */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    box-shadow: var(--shadow);
+  }
+  .stat-label { font-size: 11px; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: bold; color: var(--text); line-height: 1; }
+  .stat-sub { font-size: 11px; color: var(--text3); font-family: sans-serif; margin-top: 4px; }
+
+  /* Filters */
+  .filters {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    box-shadow: var(--shadow);
+  }
+  .filters input, .filters select {
+    font-size: 13px;
+    font-family: sans-serif;
+    padding: 7px 12px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+  }
+  .filters input:focus, .filters select:focus { border-color: var(--accent); }
+  .filters input[type=search] { flex: 1; min-width: 200px; }
+  .filter-label { font-size: 12px; font-family: sans-serif; color: var(--text2); font-weight: 600; }
+  .count-badge {
+    margin-left: auto;
+    font-size: 12px;
+    font-family: sans-serif;
+    color: var(--text2);
+    background: var(--surface2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; font-family: sans-serif; }
+  thead { background: var(--surface2); border-bottom: 1px solid var(--border); }
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text2);
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  th:hover { color: var(--text); }
+  th .sort-arrow { margin-left: 4px; opacity: 0.4; }
+  th.active .sort-arrow { opacity: 1; color: var(--accent); }
+  td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+  tr.expanded-row td { background: var(--accent-bg); border-bottom: none; }
+  tr.detail-row td { background: var(--accent-bg); padding: 0; }
+  tr.detail-row.hidden { display: none; }
+
+  .name-cell { font-weight: 600; color: var(--text); }
+  .name-cell .email { font-weight: normal; color: var(--text2); font-size: 12px; margin-top: 2px; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 11px; font-weight: 600; font-family: sans-serif;
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .badge-minor { background: var(--warn-bg); color: var(--warn-text); border: 1px solid #f0d98a; }
+  .badge-adult { background: var(--accent-bg); color: var(--accent-text); border: 1px solid #b8dfc9; }
+  .badge-template { background: var(--info-bg); color: var(--info-text); border: 1px solid #c0d8f0; }
+  .badge-verified { background: var(--accent-bg); color: var(--accent-text); }
+
+  /* Expand detail panel */
+  .detail-panel {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid #c8e8d8;
+  }
+  .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+  .detail-item .dl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text3); margin-bottom: 3px; }
+  .detail-item .dv { font-size: 13px; color: var(--text); word-break: break-all; }
+  .detail-item .dv a { color: var(--accent); text-decoration: none; }
+  .detail-item .dv a:hover { text-decoration: underline; }
+  .mono { font-family: 'Courier New', monospace; font-size: 11px; }
+
+  .participants-title { font-size: 12px; font-family: sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); margin-bottom: 8px; }
+  .participant-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 4px;
+    font-size: 13px;
+    font-family: sans-serif;
+  }
+  .participant-row:last-child { margin-bottom: 0; }
+
+  /* Toggle button */
+  .toggle-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--accent); font-size: 13px; font-family: sans-serif;
+    font-weight: 600; padding: 0; display: flex; align-items: center; gap: 4px;
+  }
+  .toggle-btn:hover { text-decoration: underline; }
+  .arrow { display: inline-block; transition: transform 0.2s; }
+  .arrow.open { transform: rotate(90deg); }
+
+  /* Empty / loading */
+  .empty { text-align: center; padding: 4rem 2rem; color: var(--text3); font-family: sans-serif; }
+  .empty-icon { font-size: 48px; margin-bottom: 1rem; opacity: 0.3; }
+
+  .loading-overlay {
+    display: none;
+    text-align: center; padding: 3rem; color: var(--text2); font-family: sans-serif; font-size: 14px;
+  }
+  .spinner {
+    display: inline-block; width: 20px; height: 20px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle; margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Load more */
+  .load-more-row { padding: 1rem; text-align: center; border-top: 1px solid var(--border); display: none; }
+
+  /* Export row */
+  .toolbar { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 0.75rem; }
+
+  @media (max-width: 768px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .detail-grid { grid-template-columns: 1fr 1fr; }
+    .main { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">✓</div>
+    SmartWaiver Dashboard
+  </div>
+  <div class="topbar-right" id="topbarStatus">Not connected</div>
+</div>
+
+<div class="main">
+
+  <div class="api-card">
+    <h2>Connect to SmartWaiver</h2>
+    <p>Enter your API key from SmartWaiver → My Account → API Keys. Your key is stored only in this browser tab and never sent anywhere except SmartWaiver's servers.</p>
+    <div class="api-row">
+      <input type="password" id="apiKey" placeholder="Your SmartWaiver API key…" autocomplete="off" />
+      <button class="btn btn-primary" id="loadBtn" onclick="loadAll()">&#8635; Load Waivers</button>
+      <button class="btn btn-ghost" onclick="clearDashboard()">Clear</button>
+    </div>
+  </div>
+
+  <div class="alert alert-danger" id="errorAlert">
+    <span>⚠</span> <span id="errorMsg"></span>
+  </div>
+
+  <div id="statsRow" style="display:none">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Total waivers</div>
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-sub">loaded so far</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Adults</div>
+        <div class="stat-value" id="statAdults">0</div>
+        <div class="stat-sub">participants</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Minors</div>
+        <div class="stat-value" id="statMinors">0</div>
+        <div class="stat-sub">participants</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Waiver types</div>
+        <div class="stat-value" id="statTemplates">0</div>
+        <div class="stat-sub">templates</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-ghost" onclick="exportCSV()" style="font-size:12px;">⬇ Export CSV</button>
+    </div>
+
+    <div class="filters">
+      <span class="filter-label">Filter:</span>
+      <input type="search" id="searchBox" placeholder="Search by name or email…" oninput="renderTable()" />
+      <select id="templateFilter" onchange="renderTable()">
+        <option value="">All waiver types</option>
+      </select>
+      <select id="sortCol" onchange="renderTable()">
+        <option value="date-desc">Newest first</option>
+        <option value="date-asc">Oldest first</option>
+        <option value="name-asc">Name A–Z</option>
+        <option value="name-desc">Name Z–A</option>
+      </select>
+      <span class="count-badge" id="countBadge">— waivers</span>
+    </div>
+
+    <div class="table-wrap">
+      <div class="loading-overlay" id="loadingMsg">
+        <span class="spinner"></span> Loading waivers from SmartWaiver…
+      </div>
+      <table id="waiverTable">
+        <thead>
+          <tr>
+            <th>Guest</th>
+            <th>Waiver type</th>
+            <th>Participants</th>
+            <th>Date signed</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="emptyState" style="display:none">
+        <div class="empty-icon">📋</div>
+        <div>No waivers found matching your filters.</div>
+      </div>
+      <div class="load-more-row" id="loadMoreRow">
+        <button class="btn btn-ghost" id="loadMoreBtn" onclick="loadMore()">Load more waivers…</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_BASE = 'https://api.smartwaiver.com/v4';
+let allWaivers = [];
+let templates = {};
+let offset = 0;
+const PAGE = 100;
+let expandedId = null;
+
+function getKey() { return document.getElementById('apiKey').value.trim(); }
+
+function showError(msg) {
+  const a = document.getElementById('errorAlert');
+  document.getElementById('errorMsg').textContent = msg;
+  a.style.display = 'flex';
+}
+function hideError() { document.getElementById('errorAlert').style.display = 'none'; }
+
+async function swGet(path) {
+  const res = await fetch(API_BASE + path, {
+    headers: { 'sw-api-key': getKey(), 'Accept': 'application/json' }
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body.message || body.error || res.statusText) + ' (HTTP ' + res.status + ')');
+  }
+  return res.json();
+}
+
+async function loadTemplates() {
+  try {
+    const d = await swGet('/templates');
+    templates = {};
+    (d.templates || []).forEach(t => { templates[t.templateId] = t.title; });
+    const sel = document.getElementById('templateFilter');
+    sel.innerHTML = '<option value="">All waiver types</option>';
+    Object.entries(templates).forEach(([id, title]) => {
+      const o = document.createElement('option');
+      o.value = id; o.textContent = title;
+      sel.appendChild(o);
+    });
+    document.getElementById('statTemplates').textContent = Object.keys(templates).length;
+  } catch(e) {}
+}
+
+async function loadAll() {
+  if (!getKey()) { showError('Please enter your SmartWaiver API key first.'); return; }
+  hideError();
+  allWaivers = []; offset = 0;
+  document.getElementById('statsRow').style.display = 'none';
+  document.getElementById('loadBtn').disabled = true;
+  document.getElementById('loadingMsg').style.display = 'block';
+  try {
+    await loadTemplates();
+    await fetchPage();
+    document.getElementById('statsRow').style.display = 'block';
+    document.getElementById('topbarStatus').textContent = 'Connected · ' + allWaivers.length + ' waivers loaded';
+  } catch(e) {
+    showError('Could not load waivers: ' + e.message + '. Check your API key is correct and enabled in SmartWaiver → API Keys.');
+  } finally {
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('loadBtn').disabled = false;
+  }
+}
+
+async function fetchPage() {
+  const d = await swGet('/waivers?limit=' + PAGE + '&offset=' + offset + '&verified=true');
+  const batch = d.waivers || [];
+  allWaivers = allWaivers.concat(batch);
+  offset += batch.length;
+  updateStats();
+  renderTable();
+  const row = document.getElementById('loadMoreRow');
+  row.style.display = batch.length === PAGE ? 'block' : 'none';
+}
+
+async function loadMore() {
+  document.getElementById('loadMoreBtn').disabled = true;
+  document.getElementById('loadMoreBtn').textContent = 'Loading…';
+  try { await fetchPage(); } catch(e) { showError(e.message); }
+  document.getElementById('loadMoreBtn').disabled = false;
+  document.getElementById('loadMoreBtn').textContent = 'Load more waivers…';
+}
+
+function updateStats() {
+  let adults = 0, minors = 0;
+  allWaivers.forEach(w => {
+    const parts = w.participants || [];
+    if (parts.length === 0) { adults++; return; }
+    parts.forEach(p => { if (p.isMinor) minors++; else adults++; });
+  });
+  document.getElementById('statTotal').textContent = allWaivers.length;
+  document.getElementById('statAdults').textContent = adults;
+  document.getElementById('statMinors').textContent = minors;
+  document.getElementById('topbarStatus').textContent = 'Connected · ' + allWaivers.length + ' waivers';
+}
+
+function fmtDate(str) {
+  if (!str) return '—';
+  const d = new Date(str);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function fmtDateShort(str) {
+  if (!str) return '—';
+  return new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function initials(first, last) {
+  return ((first||'?')[0] + (last||'?')[0]).toUpperCase();
+}
+
+function filtered() {
+  const q = (document.getElementById('searchBox').value || '').toLowerCase();
+  const tmpl = document.getElementById('templateFilter').value;
+  const sort = document.getElementById('sortCol').value;
+  let list = allWaivers.filter(w => {
+    const name = ((w.firstName||'') + ' ' + (w.lastName||'')).toLowerCase();
+    const email = (w.email || '').toLowerCase();
+    const parts = (w.participants||[]).map(p => (p.firstName+' '+p.lastName).toLowerCase()).join(' ');
+    const matchQ = !q || name.includes(q) || email.includes(q) || parts.includes(q);
+    const matchT = !tmpl || w.templateId === tmpl;
+    return matchQ && matchT;
+  });
+  list.sort((a, b) => {
+    if (sort === 'date-desc') return new Date(b.createdOn||0) - new Date(a.createdOn||0);
+    if (sort === 'date-asc') return new Date(a.createdOn||0) - new Date(b.createdOn||0);
+    const na = ((a.firstName||'') + (a.lastName||'')).toLowerCase();
+    const nb = ((b.firstName||'') + (b.lastName||'')).toLowerCase();
+    return sort === 'name-asc' ? na.localeCompare(nb) : nb.localeCompare(na);
+  });
+  return list;
+}
+
+function renderTable() {
+  const list = filtered();
+  document.getElementById('countBadge').textContent = list.length + ' waiver' + (list.length !== 1 ? 's' : '');
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  document.getElementById('emptyState').style.display = list.length ? 'none' : 'block';
+  document.getElementById('waiverTable').style.display = list.length ? '' : 'none';
+
+  list.forEach(w => {
+    const hasMinor = (w.participants||[]).some(p => p.isMinor);
+    const tname = templates[w.templateId] || 'Waiver';
+    const partCount = (w.participants||[]).length || 1;
+    const isExpanded = expandedId === w.waiverId;
+
+    const tr = document.createElement('tr');
+    if (isExpanded) tr.className = 'expanded-row';
+    tr.innerHTML = `
+      <td>
+        <div class="name-cell">${w.firstName||''} ${w.lastName||''}</div>
+        ${w.email ? '<div class="email">' + w.email + '</div>' : ''}
+      </td>
+      <td><span class="badge badge-template">${tname}</span></td>
+      <td>
+        ${partCount} ${partCount===1?'person':'people'}
+        ${hasMinor ? ' &nbsp;<span class="badge badge-minor">Minor</span>' : ''}
+      </td>
+      <td style="white-space:nowrap; font-size:12px;">${fmtDateShort(w.createdOn)}</td>
+      <td><span class="badge badge-verified">✓ Signed</span></td>
+      <td><button class="toggle-btn" onclick="toggleExpand('${w.waiverId}')">
+        Details <span class="arrow ${isExpanded?'open':''}">▶</span>
+      </button></td>`;
+    tbody.appendChild(tr);
+
+    if (isExpanded) {
+      const trDetail = document.createElement('tr');
+      trDetail.className = 'detail-row';
+      const parts = w.participants || [];
+      trDetail.innerHTML = `<td colspan="6">
+        <div class="detail-panel">
+          <div class="detail-grid">
+            <div class="detail-item"><div class="dl">Waiver ID</div><div class="dv mono">${w.waiverId||'—'}</div></div>
+            <div class="detail-item"><div class="dl">Email</div><div class="dv">${w.email ? '<a href="mailto:'+w.email+'">'+w.email+'</a>' : '—'}</div></div>
+            <div class="detail-item"><div class="dl">Phone</div><div class="dv">${w.phone||'—'}</div></div>
+            <div class="detail-item"><div class="dl">Date signed</div><div class="dv">${fmtDate(w.createdOn)}</div></div>
+            <div class="detail-item"><div class="dl">IP address</div><div class="dv mono">${w.clientIp||'—'}</div></div>
+            <div class="detail-item"><div class="dl">Template</div><div class="dv">${tname}</div></div>
+          </div>
+          ${parts.length ? `
+          <div class="participants-title">Participants (${parts.length})</div>
+          ${parts.map(p => `
+            <div class="participant-row">
+              <span>${p.isMinor ? '👶' : '👤'}</span>
+              <strong>${p.firstName||''} ${p.lastName||''}</strong>
+              ${p.isMinor ? '<span class="badge badge-minor">Minor</span>' : '<span class="badge badge-adult">Adult</span>'}
+              ${p.dob ? '<span style="font-size:12px;color:#888;margin-left:auto;">DOB: '+p.dob+'</span>' : ''}
+            </div>`).join('')}` : ''}
+        </div>
+      </td>`;
+      tbody.appendChild(trDetail);
+    }
+  });
+}
+
+function toggleExpand(wId) {
+  expandedId = (expandedId === wId) ? null : wId;
+  renderTable();
+}
+
+function clearDashboard() {
+  allWaivers = []; templates = {}; offset = 0; expandedId = null;
+  document.getElementById('apiKey').value = '';
+  document.getElementById('statsRow').style.display = 'none';
+  document.getElementById('topbarStatus').textContent = 'Not connected';
+  hideError();
+}
+
+function exportCSV() {
+  const list = filtered();
+  const rows = [['Waiver ID','First Name','Last Name','Email','Phone','Date Signed','Template','Participants','Has Minor','IP']];
+  list.forEach(w => {
+    const parts = (w.participants||[]).map(p => p.firstName+' '+p.lastName).join('; ');
+    const hasMinor = (w.participants||[]).some(p=>p.isMinor) ? 'Yes' : 'No';
+    rows.push([
+      w.waiverId||'', w.firstName||'', w.lastName||'', w.email||'', w.phone||'',
+      fmtDateShort(w.createdOn), templates[w.templateId]||'', parts, hasMinor, w.clientIp||''
+    ]);
+  });
+  const csv = rows.map(r => r.map(c => '"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'smartwaiver_export_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+document.getElementById('apiKey').addEventListener('keydown', e => { if (e.key === 'Enter') loadAll(); });
+</script>
+</body>
+</html>
